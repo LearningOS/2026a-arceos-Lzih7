@@ -165,6 +165,41 @@ impl VfsNodeOps for DirNode {
         }
     }
 
+    /// Rename a regular file within the same directory, preserving its node.
+    fn rename(&self, src_path: &str, dst_path: &str) -> VfsResult {
+        let src = src_path.trim_start_matches('/');
+        let dst = dst_path.trim_start_matches('/');
+        let (src_parent, src_name) = src.rsplit_once('/').unwrap_or(("", src));
+        let (dst_parent, dst_name) = dst.rsplit_once('/').unwrap_or(("", dst));
+        let valid = |name: &str| !name.is_empty() && name != "." && name != "..";
+        if !valid(src_name) || !valid(dst_name) {
+            return Err(VfsError::InvalidInput);
+        }
+        if src_parent != dst_parent {
+            return Err(VfsError::Unsupported);
+        }
+        if !src_parent.is_empty() {
+            return self.this.upgrade().ok_or(VfsError::NotFound)?
+                .lookup(src_parent)?.rename(src_name, dst_name);
+        }
+        let mut children = self.children.write();
+        let node = children.get(src_name).ok_or(VfsError::NotFound)?;
+        if !node.get_attr()?.is_file() {
+            return Err(VfsError::Unsupported);
+        }
+        if src_name == dst_name {
+            return Ok(());
+        }
+        if let Some(target) = children.get(dst_name) {
+            if !target.get_attr()?.is_file() {
+                return Err(VfsError::IsADirectory);
+            }
+        }
+        let node = children.remove(src_name).ok_or(VfsError::NotFound)?;
+        children.insert(dst_name.into(), node);
+        Ok(())
+    }
+
     axfs_vfs::impl_vfs_dir_default! {}
 }
 

@@ -322,7 +322,7 @@ dependencies = [
  "axdriver_block",
  "axerrno 0.1.2",
  "axfs_devfs",
- "axfs_ramfs",
+ "axfs_ramfs 0.1.1",
  "axfs_vfs",
  "axio",
  "axsync",
@@ -340,6 +340,15 @@ name = "axfs_devfs"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81b87ae981272ca8d5d8f106a4452c63f4b5ac36e17ee8f848ee1b250538b9f8"
+dependencies = [
+ "axfs_vfs",
+ "log",
+ "spin",
+]
+
+[[package]]
+name = "axfs_ramfs"
+version = "0.1.1"
 dependencies = [
  "axfs_vfs",
  "log",
@@ -1439,7 +1448,7 @@ dependencies = [
 name = "ramfs_rename"
 version = "0.1.0"
 dependencies = [
- "axfs_ramfs",
+ "axfs_ramfs 0.1.2",
  "axfs_vfs",
  "axstd",
  "crate_interface",

@@ -134,3 +134,34 @@ fn test_ramfs() {
     assert_eq!(root.remove("./foo"), Ok(()));
     assert!(ramfs.root_dir_node().get_entries().is_empty());
 }
+
+#[test]
+fn test_rename_file() -> VfsResult {
+    let fs = RamFileSystem::new();
+    let root = fs.root_dir();
+    root.create("f1", VfsNodeType::File)?;
+    let original = root.clone().lookup("f1")?;
+    original.write_at(0, b"hello")?;
+    root.rename("f1", "f2")?;
+    assert_eq!(root.clone().lookup("f1").err(), Some(VfsError::NotFound));
+    let renamed = root.clone().lookup("f2")?;
+    assert!(Arc::ptr_eq(&original, &renamed));
+    let mut buf = [0; 5];
+    assert_eq!(renamed.read_at(0, &mut buf)?, 5);
+    assert_eq!(&buf, b"hello");
+    root.rename("f2", "f2")?;
+    root.create("target", VfsNodeType::File)?;
+    assert_eq!(root.rename("missing", "target"), Err(VfsError::NotFound));
+    assert!(root.clone().lookup("target").is_ok());
+    root.rename("f2", "target")?;
+    assert!(Arc::ptr_eq(&original, &root.clone().lookup("target")?));
+    root.create("sub", VfsNodeType::Dir)?;
+    assert_eq!(root.rename("target", "sub"), Err(VfsError::IsADirectory));
+    assert_eq!(root.rename("target", "sub/new"), Err(VfsError::Unsupported));
+    assert_eq!(root.rename("target", ".."), Err(VfsError::InvalidInput));
+    root.create("sub/a", VfsNodeType::File)?;
+    root.rename("sub/a", "sub/b")?;
+    assert!(root.clone().lookup("sub/b").is_ok());
+    assert_eq!(root.lookup("sub/a").err(), Some(VfsError::NotFound));
+    Ok(())
+}
