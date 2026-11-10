@@ -29,7 +29,7 @@ fp_simd = ["axfeat/fp_simd"]
 irq = ["arceos_api/irq", "axfeat/irq"]
 
 # Memory
-alloc = ["arceos_api/alloc", "axfeat/alloc", "axio/alloc"]
+alloc = ["arceos_api/alloc", "axfeat/alloc", "axio/alloc", "dep:hashbrown"]
 alloc-tlsf = ["axfeat/alloc-tlsf"]
 alloc-slab = ["axfeat/alloc-slab"]
 alloc-buddy = ["axfeat/alloc-buddy"]
@@ -80,3 +80,4 @@ arceos_api = { workspace = true }
 axio = "0.1"
 axerrno = "0.1"
 kspin = "0.1"
+hashbrown = { version = "0.15.5", default-features = false, features = ["default-hasher"], optional = true }
