@@ -158,6 +158,22 @@ impl AddrSpace {
         Ok(())
     }
 
+    /// Removes allocation-backed mappings, releasing their frames and areas.
+    ///
+    /// Use this for ranges created by `map_alloc`; `unmap` also supports
+    /// untracked linear page-table mappings but does not release data frames.
+    pub fn unmap_alloc(&mut self, start: VirtAddr, size: usize) -> AxResult {
+        if !self.contains_range(start, size)
+            || !start.is_aligned_4k()
+            || !is_aligned_4k(size)
+        {
+            return ax_err!(InvalidInput, "invalid allocation mapping range");
+        }
+        self.areas
+            .unmap(start, size, &mut self.pt)
+            .map_err(mapping_err_to_ax_err)
+    }
+
     /// Removes mappings within the specified virtual address range.
     ///
     /// Returns an error if the address range is out of the address space or not

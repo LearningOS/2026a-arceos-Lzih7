@@ -104,14 +104,17 @@ dependencies = [
  "axhal",
  "axio",
  "axlog",
+ "axmm",
  "axnet",
  "axruntime",
  "axsync",
  "axtask",
  "bindgen",
+ "bitflags 2.13.2",
  "flatten_objects",
  "home",
  "lazy_static",
+ "memory_addr",
  "spin",
  "static_assertions",
 ]
@@ -1931,11 +1934,9 @@ dependencies = [
  "axstd",
  "axsync",
  "axtask",
- "bitflags 2.13.2",
  "elf",
  "kernel-elf-parser",
  "linkme",
- "memory_addr",
 ]
 
 [[package]]

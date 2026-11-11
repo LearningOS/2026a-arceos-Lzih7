@@ -40,6 +40,8 @@ pub use imp::time::{sys_clock_gettime, sys_nanosleep};
 pub use imp::fd_ops::{sys_close, sys_dup, sys_dup2, sys_fcntl, get_file_like};
 #[cfg(feature = "fs")]
 pub use imp::fs::{sys_fstat, sys_getcwd, sys_lseek, sys_lstat, sys_open, sys_rename, sys_stat};
+#[cfg(feature = "mmap")]
+pub use imp::mmap::sys_mmap;
 #[cfg(feature = "select")]
 pub use imp::io_mpx::sys_select;
 #[cfg(feature = "epoll")]

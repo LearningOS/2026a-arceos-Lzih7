@@ -25,6 +25,7 @@ alloc = ["dep:axalloc", "axfeat/alloc"]
 multitask = ["axtask/multitask", "axfeat/multitask", "axsync/multitask"]
 fd = ["alloc"]
 fs = ["dep:axfs", "axfeat/fs", "fd"]
+mmap = ["fs", "dep:axmm", "dep:memory_addr", "dep:bitflags", "axfeat/paging"]
 net = ["dep:axnet", "axfeat/net", "fd"]
 pipe = ["fd"]
 select = ["fd"]
@@ -42,10 +43,13 @@ axalloc = { workspace = true, optional = true }
 axtask = { workspace = true, optional = true }
 axfs = { workspace = true, optional = true }
 axnet = { workspace = true, optional = true }
+axmm = { workspace = true, optional = true }
 
 # Other crates
 axio = "0.1"
 axerrno = "0.1"
+memory_addr = { version = "0.3", optional = true }
+bitflags = { version = "2.6", optional = true }
 flatten_objects = "0.1"
 static_assertions = "1.1.0"
 spin = { version = "0.9" }

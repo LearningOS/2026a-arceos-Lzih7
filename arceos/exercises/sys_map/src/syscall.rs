@@ -6,7 +6,6 @@ use axhal::trap::{register_trap_handler, SYSCALL};
 use axerrno::LinuxError;
 use axtask::current;
 use axtask::TaskExtRef;
-use axhal::paging::MappingFlags;
 use arceos_posix_api as api;
 
 const SYS_IOCTL: usize = 29;
@@ -21,80 +20,6 @@ const SYS_SET_TID_ADDRESS: usize = 96;
 const SYS_MMAP: usize = 222;
 
 const AT_FDCWD: i32 = -100;
-
-/// Macro to generate syscall body
-///
-/// It will receive a function which return Result<_, LinuxError> and convert it to
-/// the type which is specified by the caller.
-#[macro_export]
-macro_rules! syscall_body {
-    ($fn: ident, $($stmt: tt)*) => {{
-        #[allow(clippy::redundant_closure_call)]
-        let res = (|| -> axerrno::LinuxResult<_> { $($stmt)* })();
-        match res {
-            Ok(_) | Err(axerrno::LinuxError::EAGAIN) => debug!(concat!(stringify!($fn), " => {:?}"),  res),
-            Err(_) => info!(concat!(stringify!($fn), " => {:?}"), res),
-        }
-        match res {
-            Ok(v) => v as _,
-            Err(e) => {
-                -e.code() as _
-            }
-        }
-    }};
-}
-
-bitflags::bitflags! {
-    #[derive(Debug)]
-    /// permissions for sys_mmap
-    ///
-    /// See <https://github.com/bminor/glibc/blob/master/bits/mman.h>
-    struct MmapProt: i32 {
-        /// Page can be read.
-        const PROT_READ = 1 << 0;
-        /// Page can be written.
-        const PROT_WRITE = 1 << 1;
-        /// Page can be executed.
-        const PROT_EXEC = 1 << 2;
-    }
-}
-
-impl From<MmapProt> for MappingFlags {
-    fn from(value: MmapProt) -> Self {
-        let mut flags = MappingFlags::USER;
-        if value.contains(MmapProt::PROT_READ) {
-            flags |= MappingFlags::READ;
-        }
-        if value.contains(MmapProt::PROT_WRITE) {
-            flags |= MappingFlags::WRITE;
-        }
-        if value.contains(MmapProt::PROT_EXEC) {
-            flags |= MappingFlags::EXECUTE;
-        }
-        flags
-    }
-}
-
-bitflags::bitflags! {
-    #[derive(Debug)]
-    /// flags for sys_mmap
-    ///
-    /// See <https://github.com/bminor/glibc/blob/master/bits/mman.h>
-    struct MmapFlags: i32 {
-        /// Share changes
-        const MAP_SHARED = 1 << 0;
-        /// Changes private; copy pages on write.
-        const MAP_PRIVATE = 1 << 1;
-        /// Map address must be exactly as requested, no matter whether it is available.
-        const MAP_FIXED = 1 << 4;
-        /// Don't use a file.
-        const MAP_ANONYMOUS = 1 << 5;
-        /// Don't check for reservations.
-        const MAP_NORESERVE = 1 << 14;
-        /// Allocation is for a stack.
-        const MAP_STACK = 0x20000;
-    }
-}
 
 #[register_trap_handler(SYSCALL)]
 fn handle_syscall(tf: &TrapFrame, syscall_num: usize) -> isize {
@@ -131,16 +56,17 @@ fn handle_syscall(tf: &TrapFrame, syscall_num: usize) -> isize {
     ret
 }
 
-#[allow(unused_variables)]
 fn sys_mmap(
     addr: *mut usize,
     length: usize,
     prot: i32,
     flags: i32,
     fd: i32,
-    _offset: isize,
+    offset: isize,
 ) -> isize {
-    unimplemented!("no sys_mmap!");
+    let curr = current();
+    let mut aspace = curr.task_ext().aspace.lock();
+    api::sys_mmap(&mut aspace, addr, length, prot, flags, fd, offset)
 }
 
 fn sys_openat(dfd: c_int, fname: *const c_char, flags: c_int, mode: api::ctypes::mode_t) -> isize {

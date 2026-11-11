@@ -14,6 +14,10 @@ pub const AX_FILE_LIMIT: usize = 1024;
 #[allow(dead_code)]
 pub trait FileLike: Send + Sync {
     fn read(&self, buf: &mut [u8]) -> LinuxResult<usize>;
+    /// Reads at an explicit offset without changing the file cursor.
+    fn read_at(&self, _offset: u64, _buf: &mut [u8]) -> LinuxResult<usize> {
+        Err(LinuxError::ENODEV)
+    }
     fn write(&self, buf: &[u8]) -> LinuxResult<usize>;
     fn stat(&self) -> LinuxResult<ctypes::stat>;
     fn into_any(self: Arc<Self>) -> Arc<dyn core::any::Any + Send + Sync>;

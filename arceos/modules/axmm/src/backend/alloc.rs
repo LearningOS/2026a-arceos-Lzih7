@@ -43,12 +43,25 @@ impl Backend {
         if populate {
             // allocate all possible physical frames for populated mapping.
             for addr in PageIter4K::new(start, start + size).unwrap() {
-                if let Some(frame) = alloc_frame(true) {
-                    if let Ok(tlb) = pt.map(addr, frame, PageSize::Size4K, flags) {
-                        tlb.ignore(); // TLB flush on map is unnecessary, as there are no outdated mappings.
-                    } else {
-                        return false;
+                let mapped = if let Some(frame) = alloc_frame(true) {
+                    match pt.map(addr, frame, PageSize::Size4K, flags) {
+                        Ok(tlb) => {
+                            tlb.ignore();
+                            true
+                        }
+                        Err(_) => {
+                            dealloc_frame(frame);
+                            false
+                        }
                     }
+                } else {
+                    false
+                };
+                if !mapped {
+                    // The area is not installed on failure, so undo earlier
+                    // pages here rather than leaving an incomplete mapping.
+                    self.unmap_alloc(start, addr - start, pt, populate);
+                    return false;
                 }
             }
             true
