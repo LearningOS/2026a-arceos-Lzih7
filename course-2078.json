@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2078,
   "repository": "LearningOS/2026a-arceos-Lzih7",
-  "commit": "fa839f87b869326d1cef0bf6cf536c13ecf74397",
-  "score": 400,
+  "commit": "f56a2a52d7914548c004d5ec01f552abbdcf437c",
+  "score": 500,
   "totalScore": 600,
   "exercises": [
     {
@@ -37,8 +37,8 @@
     {
       "name": "sys_map",
       "max": 100,
-      "score": 0,
-      "status": "fail",
+      "score": 100,
+      "status": "pass",
       "exitCode": 0
     },
     {
@@ -50,9 +50,9 @@
     }
   ],
   "student": "Lzih7",
-  "runId": "42945930090",
+  "runId": "42953465273",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
