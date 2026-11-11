@@ -2,7 +2,7 @@
   "schema": 1,
   "courseId": 2078,
   "repository": "LearningOS/2026a-arceos-Lzih7",
-  "commit": "5a089fb689e36ee70ee401a212dd1e2ace8234aa",
+  "commit": "fa839f87b869326d1cef0bf6cf536c13ecf74397",
   "score": 400,
   "totalScore": 600,
   "exercises": [
@@ -50,9 +50,9 @@
     }
   ],
   "student": "Lzih7",
-  "runId": "42772883376",
+  "runId": "42945930090",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
