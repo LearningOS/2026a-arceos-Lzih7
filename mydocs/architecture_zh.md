@@ -529,7 +529,7 @@ axstd::fs::rename
 
 用户态的寄存器现场与内核任务切换现场用途不同：`TrapFrame` 用于保存陷阱发生时的状态，任务上下文用于调度切换；两者共同支撑用户程序执行。
 
-当前 `sys_map` 中的 `sys_mmap` 仍为 `unimplemented!("no sys_mmap!")`。框架具备用户程序装载和系统调用分发路径，但不能据此认为文件映射练习已经完成，也不能把示例当作完整进程管理系统。
+当前 `sys_map` 已通过 `arceos_posix_api::sys_mmap` 实现立即分配的私有文件映射和匿名映射，具体分层与限制见[第五题说明](05-sys-map-syscall.md)。该示例仍不包含完整的进程管理系统。
 
 入口：[sys_map/main.rs](../arceos/exercises/sys_map/src/main.rs)、[task.rs](../arceos/exercises/sys_map/src/task.rs)、[syscall.rs](../arceos/exercises/sys_map/src/syscall.rs)、[axhal/trap.rs](../arceos/modules/axhal/src/trap.rs)。
 
@@ -541,7 +541,7 @@ axstd::fs::rename
 
 这里二阶段映射负责把客体物理地址转换为宿主物理地址，与普通用户程序的虚拟地址映射职责不同。当前模块仍有未覆盖事件的 `todo!()`，功能范围取决于示例。
 
-`exercises/simple_hv` 还在自己的目录中保存了一套简化的 vCPU、CSR 和 SBI 代码，不能把它的所有行为归到 `modules/riscv_vcpu`。该练习加载客体 `skernel2`，进入客体并处理退出；当前示例在完成检查后使用 `panic!("Hypervisor ok!")` 结束流程。
+`exercises/simple_hv` 还在自己的目录中保存了一套简化的 vCPU、CSR 和 SBI 代码，不能把它的所有行为归到 `modules/riscv_vcpu`。该练习加载客体 `skernel2`，模拟 `mhartid` 读取和地址 `0x40` 的读取，在 SBI 关机时验证寄存器，解除二阶段页表后正常返回。进入、退出与地址转换过程见[第六题说明](06-simple-hv.md)。
 
 入口：[riscv_vcpu/lib.rs](../arceos/modules/riscv_vcpu/src/lib.rs)、[vcpu.rs](../arceos/modules/riscv_vcpu/src/vcpu.rs)、[simple_hv/main.rs](../arceos/exercises/simple_hv/src/main.rs)。
 
